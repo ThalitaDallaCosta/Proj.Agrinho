@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<title>Impacto do Desmatamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<style>
+  :root {
+    --color-bg-light: #f5f7fa;
+    --color-bg-dark: #121217;
+    --color-primary-light: #4f46e5; /* Indigo-600 */
+    --color-primary-dark: #8b5cf6;
+    --color-text-light: #1f2937;
+    --color-text-dark: #e0e0e0;
+    --color-glass-light: rgba(255 255 255 / 0.6);
+    --color-glass-dark: rgba(18 18 23 / 0.5);
+    --color-shadow-light: rgba(0 0 0 / 0.1);
+    --color-shadow-dark: rgba(0 0 0 / 0.6);
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --header-height: 64px;
+    --sidebar-width: 280px;
+  }
+
+  /* Dark mode overrides */
+  body.dark {
+    --color-bg: var(--color-bg-dark);
+    --color-text: var(--color-text-dark);
+    --color-glass: var(--color-glass-dark);
+    --color-primary: var(--color-primary-dark);
+    --color-shadow: var(--color-shadow-dark);
+  }
+
+  /* Light mode */
+  body:not(.dark) {
+    --color-bg: var(--color-bg-light);
+    --color-text: var(--color-text-light);
+    --color-glass: var(--color-glass-light);
+    --color-primary: var(--color-primary-light);
+    --color-shadow: var(--color-shadow-light);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+      'Segoe UI Emoji';
+    font-size: clamp(1rem, 1vw + 0.5rem, 1.125rem);
+    line-height: 1.5;
+    background: var(--color-bg);
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+  a:hover,
+  a:focus {
+    text-decoration: underline;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary);
+    border-radius: 12px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 51;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: var(--color-glass);
+    backdrop-filter: saturate(180%) blur(16px);
+    box-shadow: 0 4px 12px var(--color-shadow);
+    user-select: none;
+  }
+
+  .header-brand {
+    font-weight: 800;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    color: var(--color-primary);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-brand .material-icons {
+    font-size: 32px;
+    color: var(--color-primary);
+  }
+
+  nav.main-nav {
+    display: flex;
+    gap: 16px;
+  }
+
+  nav.main-nav a {
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color var(--transition);
+  }
+  nav.main-nav a:hover,
+  nav.main-nav a:focus {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    outline-offset: 4px;
+  }
+
+  /* Theme toggle button */
+  .btn-theme-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-primary);
+    font-size: 28px;
+    padding: 4px;
+    border-radius: 12px;
+    transition: background-color var(--transition), color var(--transition);
+  }
+  .btn-theme-toggle:hover,
+  .btn-theme-toggle:focus {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    outline-offset: 4px;
+  }
+
+  /* Layout container with sidebar and main */
+  .app-container {
+    flex: 1 1 auto;
+    display: flex;
+    min-height: calc(100vh - var(--header-height));
+    background: var(--color-bg);
+  }
+
+  /* Sidebar */
+  aside.sidebar {
+    width: var(--sidebar-width);
+    padding: 24px 16px 32px 16px;
+    background: var(--color-glass);
+    backdrop-filter: saturate(180%) blur(16px);
+    box-shadow: 2px 0 10px var(--color-shadow);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-shadow);
+  }
+
+  .nav-links {
+    flex: 1 1 auto;
+    margin-top: 24px;
+    list-style: none;
+    padding: 0;
+  }
+
+  .nav-links li {
+    margin-bottom: 16px;
+  }
+
+  .nav-links button,
+  .nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+    text-align: left;
+  }
+
+  .nav-links button:hover,
+  .nav-links a:hover,
+  .nav-links button:focus,
+  .nav-links a:focus {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    outline-offset: 4px;
+  }
+
+  .nav-links .material-icons {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .badge {
+    margin-left: auto;
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+
+  /* Main content */
+  main.content {
+    flex: 1 1 auto;
+    padding: 32px 40px;
+    overflow-y: auto;
+    min-height: calc(100vh - var(--header-height));
+  }
+
+  main.content h1,
+  main.content h2,
+  main.content h3 {
+    margin-top: 0;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  main.content h1 {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    margin-bottom: 16px;
+  }
+
+  main.content > section {
+    margin-bottom: 48px;
+  }
+
+  /* Cards for content sections */
+  .card {
+    background: var(--color-glass);
+    border-radius: 20px;
+    padding: 24px 32px;
+    box-shadow: 0 8px 24px var(--color-shadow);
+    backdrop-filter: saturate(180%) blur(18px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px var(--color-shadow);
+    outline: none;
+  }
+
+  .card p {
+    margin-bottom: 16px;
+    font-weight: 400;
+    color: var(--color-text);
+    line-height: 1.6;
+  }
+
+  .card list {
+    list-style: inside disc;
+  }
+
+  /* Footer */
+  footer.footer {
+    background: var(--color-glass);
+    backdrop-filter: saturate(180%) blur(16px);
+    box-shadow: inset 0 1px 0 var(--color-shadow);
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .footer-left {
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+
+  .footer-social {
+    display: flex;
+    gap: 20px;
+  }
+
+  .footer-social a {
+    color: var(--color-primary);
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition);
+  }
+  .footer-social a:hover,
+  .footer-social a:focus {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  /* Responsive - mobile first */
+  @media (max-width: 639px) {
+    .app-container {
+      flex-direction: column;
+    }
+
+    aside.sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 60;
+      box-shadow: 4px 0 40px var(--color-shadow);
+      border-right: 1px solid var(--color-shadow);
+    }
+    aside.sidebar.open {
+      transform: translateX(0);
+    }
+
+    main.content {
+      padding: 24px 20px;
+      min-height: calc(100vh - var(--header-height));
+    }
+
+    /* Overlay backdrop for sidebar */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 55;
+    }
+    .overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    nav.main-nav {
+      display: none;
+    }
+
+    /* Hamburger button */
+    .btn-sidebar-toggle {
+      background: transparent;
+      border: none;
+      color: var(--color-primary);
+      font-size: 32px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 12px;
+      transition: background-color var(--transition), color var(--transition);
+    }
+    .btn-sidebar-toggle:hover,
+    .btn-sidebar-toggle:focus {
+      background-color: var(--color-primary);
+      color: var(--color-bg);
+      outline-offset: 4px;
+    }
+  }
+
+  @media (min-width: 640px) {
+    nav.main-nav {
+      display: flex;
+    }
+
+    .btn-sidebar-toggle {
+      display: none;
+    }
+  }
+
+  /* Typography fluid scaling */
+  h1, h2, h3 {
+    line-height: 1.1;
+  }
+
+  /* Toast notifications */
+  #toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+  }
+
+  .toast {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    padding: 12px 24px;
+    border-radius: 24px;
+    box-shadow: 0 4px 12px var(--color-shadow);
+    font-weight: 600;
+    cursor: default;
+    opacity: 0;
+    transform: translateX(120%);
+    animation: toastSlideIn 0.4s forwards;
+  }
+
+  .toast.hide {
+    animation: toastSlideOut 0.3s forwards;
+  }
+
+  @keyframes toastSlideIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes toastSlideOut {
+    to {
+      opacity: 0;
+      transform: translateX(120%);
+    }
+  }
+</style>
+</head>
+<body>
+<header role="banner">
+  <div class="header-brand" aria-label="Logo Impacto do Desmatamento">
+    <span class="material-icons" aria-hidden="true">forest</span> Impacto do Desmatamento
+  </div>
+  <nav class="main-nav" role="navigation" aria-label="Navegação principal">
+    <a href="#introducao">Introdução</a>
+    <a href="#causas">Causas</a>
+    <a href="#consequencias">Consequências</a>
+    <a href="#solucoes">Soluções</a>
+    <a href="#contato">Contato</a>
+  </nav>
+  <button class="btn-sidebar-toggle" aria-label="Abrir menu de navegação" aria-haspopup="true" aria-expanded="false" aria-controls="sidebar">
+    <span class="material-icons">menu</span>
+  </button>
+  <button class="btn-theme-toggle" id="themeToggleBtn" aria-label="Alternar tema claro e escuro">
+    <span class="material-icons" id="themeIcon">dark_mode</span>
+  </button>
+</header>
+
+<div class="app-container">
+  <aside class="sidebar" id="sidebar" role="complementary" aria-label="Navegação lateral">
+    <div class="sidebar-header">Menu</div>
+    <ul class="nav-links" role="menu">
+      <li role="none">
+        <a href="#introducao" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">info</span>
+          Introdução
+          <span class="badge" aria-label="Seção 1">1</span>
+        </a>
+      </li>
+      <li role="none">
+        <a href="#causas" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">local_florist</span>
+          Causas
+          <span class="badge" aria-label="Seção 2">2</span>
+        </a>
+      </li>
+      <li role="none">
+        <a href="#consequencias" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">warning</span>
+          Consequências
+          <span class="badge" aria-label="Seção 3">3</span>
+        </a>
+      </li>
+      <li role="none">
+        <a href="#solucoes" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">lightbulb</span>
+          Soluções
+          <span class="badge" aria-label="Seção 4">4</span>
+        </a>
+      </li>
+      <li role="none">
+        <a href="#contato" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">contact_mail</span>
+          Contato
+          <span class="badge" aria-label="Seção 5">5</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <main class="content" role="main">
+    <section id="introducao" tabindex="0" aria-label="Introdução ao impacto do desmatamento" class="card">
+      <h1>O Impacto do Desmatamento</h1>
+      <p>
+        O desmatamento é um dos maiores desafios ambientais globais, contribuindo para a perda de biodiversidade,
+        mudanças climáticas e afetando os meios de subsistência de milhões de pessoas. A perda acelerada das florestas
+        naturais altera os ciclos hidrológicos, reduz a capacidade de sequestro de carbono e compromete a saúde dos ecossistemas.
+      </p>
+      <img 
+        src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/25c99350-1954-4d18-ab24-2d551cdc72b7.png"
+        alt="Vista aérea mostrando áreas extensas de desmatamento com terraço vasto e árvores derrubadas"
+        loading="lazy"
+        width="1200"
+        height="400"
+        style="border-radius: 16px; margin-top: 24px; max-width: 100%; height: auto;"
+      />
+    </section>
+
+    <section id="causas" tabindex="0" aria-label="Causas do desmatamento" class="card">
+      <h2>Causas do Desmatamento</h2>
+      <p>
+        Entre as principais causas do desmatamento destacam-se:
+      </p>
+      <ul>
+        <li>Expansão agrícola e pecuária, responsável pela transformação de grandes áreas florestais em terras produtivas.</li>
+        <li>Mineração ilegal e exploração madeireira predatória.</li>
+        <li>Construção de infraestruturas, como estradas e barragens, facilitando o acesso às áreas remotas.</li>
+        <li>Queimadas e práticas agrícolas inadequadas que destroem o solo e a vegetação.</li>
+      </ul>
+      <img
+        src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9c53e10a-dd41-4988-9ca9-a5d5ae762e95.png"
+        alt="Máquinas removendo árvores em uma área florestal para uso agrícola e pecuário"
+        loading="lazy"
+        width="640"
+        height="360"
+        style="border-radius: 16px; margin-top: 24px; max-width: 100%; height: auto;"
+      />
+    </section>
+
+    <section id="consequencias" tabindex="0" aria-label="Consequências do desmatamento" class="card">
+      <h2>Consequências do Desmatamento</h2>
+      <p>
+        O desmatamento traz consequências devastadoras para o planeta e para as populações:
+      </p>
+      <ul>
+        <li>Perda de habitat para milhares de espécies animais e vegetais, ameaçando a biodiversidade.</li>
+        <li>Alteração do ciclo hídrico, causando secas e enchentes extremas.</li>
+        <li>Aumento das emissões de gases de efeito estufa, agravando o aquecimento global.</li>
+        <li>Impactos sociais, incluindo deslocamentos e perda da cultura de povos indígenas.</li>
+      </ul>
+      <img
+        src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b71b221c-02c0-4e5b-b339-43fd38d0bcf0.png"
+        alt="Animais e plantas ameaçados de extinção devido ao desmatamento mostrando áreas degradadas"
+        loading="lazy"
+        width="640"
+        height="360"
+        style="border-radius: 16px; margin-top: 24px; max-width: 100%; height: auto;"
+      />
+    </section>
+
+    <section id="solucoes" tabindex="0" aria-label="Soluções para combater o desmatamento" class="card">
+      <h2>Soluções para Combater o Desmatamento</h2>
+      <p>
+        Diversas ações podem mitigar o impacto do desmatamento, entre elas:
+      </p>
+      <ul>
+        <li>Reflorestamento e restauração de áreas degradadas para recuperar ecossistemas.</li>
+        <li>Uso sustentável dos recursos naturais e práticas agrícolas responsáveis.</li>
+        <li>Fortalecimento da fiscalização ambiental e combate à exploração ilegal.</li>
+        <li>Educação ambiental e incentivo à participação das comunidades locais.</li>
+      </ul>
+      <img
+        src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3322841b-00a2-4322-8bd5-6bbff65c59bd.png"
+        alt="Grupo de pessoas plantando árvores em área reflorestada com vegetação saudável"
+        loading="lazy"
+        width="640"
+        height="360"
+        style="border-radius: 16px; margin-top: 24px; max-width: 100%; height: auto;"
+      />
+    </section>
+
+    <section id="contato" tabindex="0" aria-label="Seção de contato e chamadas para ação" class="card">
+      <h2>Contato e Como Ajudar</h2>
+      <p>Quer fazer a diferença? Entre em contato para saber como você pode contribuir para a preservação das florestas.</p>
+      <form id="contactForm" novalidate aria-live="polite" aria-describedby="formMessage" autocomplete="off">
+        <label for="name">Nome completo</label><br/>
+        <input type="text" id="name" name="name" required minlength="3" autocomplete="name" aria-required="true" aria-describedby="nameError" /><br/>
+        <span id="nameError" role="alert" style="color: #e11d48; font-weight: 600; display:none;">Por favor, insira um nome válido.</span>
+        <br/><label for="email">Email</label><br/>
+        <input type="email" id="email" name="email" required autocomplete="email" aria-required="true" aria-describedby="emailError" /><br/>
+        <span id="emailError" role="alert" style="color: #e11d48; font-weight: 600; display:none;">Por favor, insira um email válido.</span>
+        <br/><label for="message">Mensagem</label><br/>
+        <textarea id="message" name="message" required minlength="10" rows="4" aria-required="true" aria-describedby="messageError"></textarea><br/>
+        <span id="messageError" role="alert" style="color: #e11d48; font-weight: 600; display:none;">Por favor, escreva uma mensagem com pelo menos 10 caracteres.</span>
+        <br/>
+        <button type="submit" style="margin-top: 16px; padding: 12px 24px; font-weight: 700; border-radius: 12px; border: none; color: var(--color-bg); background: var(--color-primary); cursor: pointer; transition: background-color 0.3s ease;">Enviar</button>
+        <div id="formMessage" aria-live="polite" style="margin-top: 16px; font-weight: 600;"></div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-left">© 2024 Impacto do Desmatamento - Todos os direitos reservados.</div>
+  <div class="footer-social" aria-label="Redes sociais">
+    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+      <span class="material-icons" aria-hidden="true">facebook</span>
+    </a>
+    <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+      <span class="material-icons" aria-hidden="true">twitter</span>
+    </a>
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+      <span class="material-icons" aria-hidden="true">instagram</span>
+    </a>
+    <a href="mailto:contato@desmatamento.org" aria-label="Email contato">
+      <span class="material-icons" aria-hidden="true">email</span>
+    </a>
+  </div>
+</footer>
+
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<div class="overlay" tabindex="-1" aria-hidden="true"></div>
+
+<script>
+  (() => {
+    'use strict';
+
+    const body = document.body;
+    const sidebar = document.getElementById('sidebar');
+    const btnSidebarToggle = document.querySelector('.btn-sidebar-toggle');
+    const overlay = document.querySelector('.overlay');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const toastContainer = document.getElementById('toast-container');
+
+    // Sidebar toggle for mobile
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+      btnSidebarToggle.setAttribute('aria-expanded', 'true');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      btnSidebarToggle.setAttribute('aria-expanded', 'false');
+      overlay.setAttribute('aria-hidden', 'true');
+      btnSidebarToggle.focus();
+    }
+
+    btnSidebarToggle.addEventListener('click', () => {
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+
+    overlay.addEventListener('click', closeSidebar);
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        closeSidebar();
+      }
+    });
+
+    // Theme toggle logic
+    function setTheme(dark) {
+      if (dark) {
+        body.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+        localStorage.setItem('theme', 'dark');
+        showToast('Modo escuro ativado');
+      } else {
+        body.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+        localStorage.setItem('theme', 'light');
+        showToast('Modo claro ativado');
+      }
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = body.classList.contains('dark');
+      setTheme(!isDark);
+    });
+
+    // Load theme from localStorage or system preference
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        setTheme(true);
+      } else if (saved === 'light') {
+        setTheme(false);
+      } else {
+        // Detect system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(prefersDark);
+      }
+    })();
+
+    // Toast notification
+    function showToast(message, duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('hide');
+        toast.addEventListener('animationend', () => toast.remove());
+      }, duration);
+    }
+
+    // Contact form validation and submission simulation
+    const contactForm = document.getElementById('contactForm');
+    const nameInput = contactForm.querySelector('#name');
+    const emailInput = contactForm.querySelector('#email');
+    const messageInput = contactForm.querySelector('#message');
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const messageError = document.getElementById('messageError');
+    const formMessage = document.getElementById('formMessage');
+
+    function validateEmail(email) {
+      // Simple regex for email validation
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email.toLowerCase());
+    }
+
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      // Validate name
+      if (!nameInput.value.trim() || nameInput.value.trim().length < 3) {
+        nameError.style.display = 'inline';
+        valid = false;
+      } else {
+        nameError.style.display = 'none';
+      }
+
+      // Validate email
+      if (!validateEmail(emailInput.value)) {
+        emailError.style.display = 'inline';
+        valid = false;
+      } else {
+        emailError.style.display = 'none';
+      }
+
+      // Validate message
+      if (!messageInput.value.trim() || messageInput.value.trim().length < 10) {
+        messageError.style.display = 'inline';
+        valid = false;
+      } else {
+        messageError.style.display = 'none';
+      }
+
+      if (!valid) {
+        formMessage.textContent = "Por favor, corrija os erros acima.";
+        formMessage.style.color = '#e11d48';
+        return;
+      }
+
+      formMessage.textContent = 'Enviando...';
+      formMessage.style.color = 'var(--color-primary)';
+
+      // Simulate async submission
+      setTimeout(() => {
+        formMessage.textContent = 'Mensagem enviada com sucesso! Obrigado por contribuir.';
+        formMessage.style.color = 'green';
+        showToast('Mensagem enviada com sucesso!');
+        contactForm.reset();
+      }, 1800);
+    });
+
+    // Keyboard accessibility: close sidebar with Escape when focus inside
+    sidebar.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        if (sidebar.classList.contains('open')) {
+          closeSidebar();
+        }
+      }
+    });
+  })();
+</script>
+</body>
+</html>
+
